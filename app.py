@@ -18,13 +18,16 @@ app = Flask(__name__)
 # Load environment variables
 load_dotenv()
 
-# Get API keys from environment
-PINECONE_API_KEY = os.environ.get('PINECONE_API_KEY')
-OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
-
-# Set environment variables
-os.environ["PINECONE_API_KEY"] = PINECONE_API_KEY
-os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
+# Get API keys from environment (raises a clear error if either is missing,
+# instead of crashing later with "TypeError: str expected, not NoneType")
+try:
+    PINECONE_API_KEY = os.environ["PINECONE_API_KEY"]
+    OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+except KeyError as e:
+    raise RuntimeError(
+        f"Missing required environment variable: {e}. "
+        "Set it in your .env file or environment before starting the app."
+    ) from e
 
 print("🚀 Loading embeddings model...")
 embeddings = download_hugging_face_embeddings()
